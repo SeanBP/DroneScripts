@@ -1,0 +1,46 @@
+Service File:
+
+In order to automatically run a python script when booted, a 'service' file is needed.
+
+To enable or disable a service script, use the command:
+
+sudo systemctl enable waypoint_janus.service
+
+
+To create one, do:
+sudo nano /etc/systemd/system/waypoint_janus.service
+
+And in it, paste a script like:
+
+[Unit]
+Description=Waypoint Janus Control Service
+After=network.target
+
+[Service]
+Type=simple
+User=arratialab
+WorkingDirectory=/home/arratialab/Documents/DroneScripts
+ExecStart=/home/arratialab/droneenv/bin/python /home/arratialab/Documents/DroneScripts/waypoint_janus_control.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+Reload systemd daemon to recognize the new service:
+
+sudo systemctl daemon-reload
+
+Enable the service to start on boot:
+
+sudo systemctl enable waypoint_janus.service
+
+Start the service now (or reboot to test auto-start):
+
+sudo systemctl start waypoint_janus.service
+
+Check the status or logs for troubleshooting:
+
+sudo systemctl status waypoint_janus.service
+sudo journalctl -u waypoint_janus.service -f
+

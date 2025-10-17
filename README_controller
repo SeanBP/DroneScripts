@@ -1,0 +1,18 @@
+Flight Controller Setup:
+
+To connect the Raspberry Pi to the Pixhawk 2.4.8 flight controller (FC), find the
+three wires connected to the TELEM2 port, using a 6-pin connector. The order
+should be:
+
+EMPTY - BLACK - WHITE - EMPTY - EMPTY - RED
+
+Now locate the two long rows of pins on the Raspberry Pi. Orient the Pi
+such that the side with the pins is facing you (and the power is facing away).
+On the row of pins closest to the edge, the wires should be connected in this order:
+
+[15 EMPTY] - BLACK - WHITE - RED - EMPTY - EMPTY
+
+The FC requires its own power source seperate from the Pi.
+
+Initial setup instructions can be found at:
+hagerstefan.de/raspi/raspipixhawk/index.php

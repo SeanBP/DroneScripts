@@ -1,0 +1,46 @@
+JANUS DRONE SCRIPTS
+
+Here are the scripts to control Janus via the command line,
+for the purpose of automating data taking while operating
+from a drone using the pixhawk 2.4.8 flight controller (FC)
+when connected via the TELEM2 port.
+
+Confirm connection:
+With the flight controller powered on and connected, verify
+connection using the command:
+
+sudo ~/droneenv/bin/mavproxy.py --master=/dev/serial0 --baudrate 921600
+
+If you see "MAV> Detected vehicle 1:1 on link 0" in the output, the pi
+is detecting the flight controller.
+
+Running scripts:
+First activate the virtual environment using:
+
+source ~/droneenv/bin/activate
+
+Then, to make a python script executable (only needs to be done once), do:
+
+chmod +x waypoint_janus_control.py (substituting your new script)
+
+And to run the script, do:
+
+sudo ./waypoint_janus_control.py
+
+Waypoint Janus Control:
+
+This script will first attempt to connect to the FC.
+After connecting, it will wait for the first waypoint index to open 
+Janus and turn on the voltage. Then it will then wait for a second waypoint 
+index to start recording. Then it will stop / turn off voltage at a third 
+waypoint index.
+
+It is currently set up to record using whatever configuration settings
+are currently saved in Janus_Config.txt. Ensure the proper voltage is
+set correctly before running.
+
+Test Janus Recording:
+
+This script runs Janus without communicating with the flight controller.
+Like above, it uses the configuration settings currently saved in
+Janus_Config.txt. Ensure that the proper voltage is set correctly before running.
