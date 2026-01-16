@@ -1,18 +1,108 @@
-Flight Controller Setup:
+Raspberry Pi + Pixhawk TELEM1 Setup Tutorial
+===========================================
 
-To connect the Raspberry Pi to the Pixhawk 2.4.8 flight controller (FC), find the
-three wires connected to the TELEM2 port, using a 6-pin connector. The order
-should be:
+Overview
+--------
 
-EMPTY - BLACK - WHITE - EMPTY - EMPTY - RED
+This tutorial explains how to connect and configure a Raspberry Pi (RPi) so that it can communicate with a Pixhawk 2.4.8 flight controller over the MAVLink protocol using a serial connection. This allows the Raspberry Pi to run scripts, monitor waypoints, or perform additional tasks such as image recognition.
 
-Now locate the two long rows of pins on the Raspberry Pi. Orient the Pi
-such that the side with the pins is facing you (and the power is facing away).
-On the row of pins closest to the edge, the wires should be connected in this order:
+Required Parts
+--------------
 
-[15 EMPTY] - BLACK - WHITE - RED - EMPTY - EMPTY
+- 1 × Pixhawk 2.4.8 (or compatible flight controller)
+- 1 × Raspberry Pi (Model 3 or newer)
+- Jumper wires for GPIO UART connection
+- Optional: USB power supply for the Raspberry Pi
 
-The FC requires its own power source seperate from the Pi.
+Hardware Setup
+--------------
 
-Initial setup instructions can be found at:
-hagerstefan.de/raspi/raspipixhawk/index.php
+Connect the Pixhawk TELEM1 port to the Raspberry Pi GPIO pins:
+
+- TX → GPIO 15 (RXD) [Pi receives data here]
+- RX → GPIO 14 (TXD) [Pi transmits data here]
+- GND → GND [Ground connection]
+- 5V → Leave disconnected [Pi powered separately]
+
+Important: Do not power the Raspberry Pi from the Pixhawk 5V line. Remove any modules previously connected to TELEM1 (e.g., FPV telemetry radio).
+
+Configure Serial Port on Raspberry Pi
+------------------------------------
+
+1. Open the Raspberry Pi configuration tool:
+
+   sudo raspi-config
+
+2. Navigate to Interface Options → Serial Port:
+
+   - "Would you like a login shell to be accessible over serial?" → No
+   - "Would you like the serial port hardware to be enabled?" → Yes
+
+3. Reboot the Raspberry Pi:
+
+   sudo reboot
+
+4. Verify the serial device:
+
+   ls -l /dev/serial*
+
+   The device `/dev/serial0` should now point to the hardware UART (usually `ttyAMA0`).
+
+Configure Pixhawk TELEM1
+------------------------
+
+1. Connect the Pixhawk to a computer and open Mission Planner.
+2. Go to Config / Full Parameter Tree.
+3. Set the following parameters:
+
+   - SERIAL1_PROTOCOL = 2   [Enable MAVLink 2]
+   - SERIAL1_BAUD     = 921 [921600 baud]
+
+4. Save and reboot the Pixhawk.
+
+Software Setup on Raspberry Pi
+------------------------------
+
+1. Update the Raspberry Pi and install required libraries:
+
+   sudo apt-get update
+   sudo apt-get install python3-pip python3-venv libxml2-dev libxslt-dev -y
+
+2. Create a Python virtual environment:
+
+   python3 -m venv ~/drone-env
+   source ~/drone-env/bin/activate
+
+3. Upgrade pip and setuptools inside the virtual environment:
+
+   pip install --upgrade pip setuptools wheel
+
+4. Install DroneKit, DroneKit-SITL, and MAVProxy:
+
+   pip install dronekit
+   pip install dronekit-sitl
+   pip install MAVProxy
+
+   Note: do not install the adsb python package even if given a warning.
+
+5. Uninstall ModemManager to prevent serial conflicts:
+
+   sudo systemctl stop ModemManager
+   sudo systemctl disable ModemManager
+   sudo apt-get remove modemmanager -y
+
+Test Communication
+------------------
+
+1. Ensure the Pixhawk is powered.
+2. Launch MAVProxy:
+
+   source ~/drone-env/bin/activate
+   mavproxy.py --master=/dev/serial0 --baudrate 921600
+
+   You should see heartbeat messages like:
+
+   MAV> Detected vehicle 1:1 on link 0
+
+This confirms that the Raspberry Pi is successfully communicating with the Pixhawk over TELEM1.
+
